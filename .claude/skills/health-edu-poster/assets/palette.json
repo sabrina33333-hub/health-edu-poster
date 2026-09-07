@@ -1,0 +1,50 @@
+{
+  "_comment": "衛教產圖 skill 預設視覺識別（來源：高血壓照護手冊原型）。之後若使用者提供機構 logo/CI，複製這份檔案改值即可，模板讀 token 名稱、不讀色碼本身。",
+  "light": {
+    "paper": "#FBF7F2",
+    "paperRaised": "#FFFFFF",
+    "ink": "#3A2E28",
+    "inkSoft": "#7A6B60",
+    "inkFaint": "#A79A8E",
+    "primary": "#2E8C82",
+    "primaryDark": "#1D655D",
+    "primarySoft": "#D8F0EC",
+    "accentWarm": "#E08A5B",
+    "accentWarmSoft": "#FBE6D6",
+    "line": "#EADFD3",
+    "severity": {
+      "1_normal":       { "fg": "#5FA980", "bg": "#E4F1E7" },
+      "2_prehigh":      { "fg": "#C7A233", "bg": "#F4EDD3" },
+      "3_stage1":       { "fg": "#D6873A", "bg": "#F6E7D3" },
+      "4_stage2":       { "fg": "#C85D34", "bg": "#F5DCCE" },
+      "5_crisis":       { "fg": "#B23B3B", "bg": "#F1D6D3" }
+    }
+  },
+  "dark": {
+    "paper": "#1B1512",
+    "paperRaised": "#252019",
+    "ink": "#F3EAE1",
+    "inkSoft": "#C6B7A9",
+    "inkFaint": "#8F8074",
+    "primary": "#6FCCC0",
+    "primaryDark": "#9DE0D6",
+    "primarySoft": "#213631",
+    "accentWarm": "#F0A56E",
+    "accentWarmSoft": "#3D2A1B",
+    "line": "#39312A",
+    "severity": {
+      "1_normal":       { "fg": "#7FC199", "bg": "#213124" },
+      "2_prehigh":      { "fg": "#DABE57", "bg": "#332C18" },
+      "3_stage1":       { "fg": "#E29C5C", "bg": "#3A2919" },
+      "4_stage2":       { "fg": "#E2825A", "bg": "#3A2119" },
+      "5_crisis":       { "fg": "#D66E6E", "bg": "#3A1B1B" }
+    }
+  },
+  "fonts": {
+    "heading": "'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif",
+    "headingWeight": 900,
+    "body": "'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif",
+    "googleFontsLink": "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+  },
+  "logo": null
+}
