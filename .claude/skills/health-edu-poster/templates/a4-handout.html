@@ -119,6 +119,20 @@
     .compgrid{grid-template-columns:1fr;}
     h1{font-size:27px;}
   }
+
+  /* 真的印出來是 A4 尺寸：@page 設定頁面大小/邊界，.wrap 在印刷時填滿可印刷區域
+     （不能只靠螢幕版 max-width:920px，那個比 A4 版心寬，印表機會被迫縮放，字級跟版面
+     就不是設計時的樣子了）。背景色要用 print-color-adjust，不然瀏覽器預設印刷會把
+     卡片底色、嚴重度色階全部印成白底，資訊圖表的顏色語意就不見了。 */
+  @page{ size:A4; margin:15mm 14mm; }
+  @media print{
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    body{ background:var(--paper); }
+    .wrap{ max-width:100%; padding:0; }
+    section{ break-inside:avoid-page; }
+    .sev-row, .riskcard, .action-chip, .comp-card, .warn-box{ break-inside:avoid; }
+    header{ break-after:avoid; }
+  }
 </style>
 
 <!-- 這裡貼 assets/library/icons/icons.svg 的 <symbol> 內容，包在一個 display:none 的 <svg> 裡 -->

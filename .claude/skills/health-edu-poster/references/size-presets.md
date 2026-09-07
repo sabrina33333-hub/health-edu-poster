@@ -5,10 +5,26 @@
 ## `a4-handout.html` — A4 直式衛教單張（列印）
 
 - 用途：診間/家訪列印給病人帶回家，或貼在衛教看板。
-- 版面：直式，內容寬度上限約 860-920px，模擬 A4 比例，可以有多個段落（比照高血壓頁面：認識/成因/日常怎麼做/警訊四段）。
-- 內容密度：最高。可以放完整的分期表、兩欄因子清單、5-6 項行動清單、3 張警示卡。
+- 版面：直式，螢幕上內容寬度上限約 860-920px 方便閱讀，可以有多個段落（比照高血壓頁面：認識/成因/日常怎麼做/警訊四段）。
+- 內容密度：最高。可以放完整的分期表、兩欄因子清單、5-6 項行動清單、3-4 張警示卡。內容多時自然會印成兩三頁，這是正常的，不用硬塞成一頁。
 - 字級：內文 14-17px（依受眾調整，長者用上限）。
 - 這是預設／最完整的版本，其他兩個尺寸都是從這版「精簡」而不是「放大」。
+
+**真的要能印成 A4（重要，不是螢幕好看就好）：** template 裡已經內建這段 print CSS，套版時不要刪掉：
+
+```css
+@page{ size:A4; margin:15mm 14mm; }
+@media print{
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{ background:var(--paper); }
+  .wrap{ max-width:100%; padding:0; }
+  section{ break-inside:avoid-page; }
+  .sev-row, .riskcard, .action-chip, .comp-card, .warn-box{ break-inside:avoid; }
+  header{ break-after:avoid; }
+}
+```
+
+原因：螢幕版 `.wrap` 的 `max-width:920px` 比 A4 版心（扣掉邊界後約 180mm≈680px）寬，如果印刷時沒有覆寫成 100%，瀏覽器只能整頁縮小塞進紙張，字級版面就跑掉了；另外瀏覽器預設列印會把背景色全部去掉，卡片底色、嚴重度色階（`--sev-1` ~ `--sev-5`）不加 `print-color-adjust:exact` 印出來就是純白，資訊圖表的顏色語意會不見。`break-inside:avoid` 是避免一張卡片或一列資料被硬切在兩頁中間。
 
 ## `square-social.html` — 1:1 社群方圖（LINE / IG / 群組分享）
 
