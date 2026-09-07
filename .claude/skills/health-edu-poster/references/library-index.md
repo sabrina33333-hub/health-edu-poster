@@ -13,6 +13,7 @@
 | `nurse-explaining-to-child-family.png` | 醫師蹲低跟小朋友衛教說明，家長在旁陪伴 | 兒童 | 兒童衛教、疫苗、感染控制、成長發育類主題 | friendly doctor explaining health checkup to a smiling child, parent standing supportively behind |
 | `adult-selfcare-confident.png` | 成人自信地做伸展運動，旁邊桌上有居家健康監測儀器 | 成人 | 一般成人自我照護、運動類主題 | confident middle-aged adult stretching with water bottle, home health monitor on table |
 | `caregiver-helping-elderly.png` | 醫護人員／照顧者陪伴長者喝水/服藥，沙發居家情境 | 家屬照顧者 | 用藥安全、居家照護、長期照顧類主題 | warm caregiver gently helping an elderly person hold water and a pill at home（注意：AI 生成結果偏向專業醫護形象而非居家家屬，構圖仍可用於「陪伴服藥」情境，若需要更明確的「非專業家屬」形象需重新生成） |
+| `elderly-balanced-meal-diet.png` | 長者坐在餐桌前吃均衡餐（蔬菜+全穀+適量份量），旁邊有時鐘暗示定時定量 | 長者 | 飲食衛教類主題（糖尿病/高血脂/腎臟病飲食/體重管理都適用，高度可重用） | smiling elderly person eating a balanced meal with vegetables, whole grains, small clock suggesting fixed regular mealtime |
 
 ## 圖示庫（`assets/library/icons/icons.svg`）
 
@@ -42,7 +43,9 @@
 | `icon-sliders` | 可調整滑桿 | 「可改變的因子」分類標頭 |
 | `icon-family` | 兩人剪影 | 「不可改變因子/家族史」分類標頭 |
 | `icon-water` | 水滴 | 飲水、體液相關主題 |
+| `icon-eye` | 眼睛 | 視網膜病變、視力相關警示（糖尿病/眼科類） |
+| `icon-foot` | 足部＋神經末梢點 | 周邊神經病變、足部照護警示（糖尿病類） |
 
 ## 擴庫紀錄
 
-新增素材時在這裡加一行，並更新上面對應表格。目前尚未有擴庫紀錄（初始庫於 2026-09-07 建立，共 7 張角色插圖＋22 個圖示）。
+- 2026-09-07：套用「高血糖衛教」主題時新增 `elderly-balanced-meal-diet.png`（飲食衛教專用場景，長者+均衡餐+時鐘）、`icon-eye`、`icon-foot` 兩個圖示（併發症警訊需要眼睛/足部神經但庫裡沒有）。初始庫（同日建立）共 7 張角色插圖＋22 個圖示，加上這次共 8 張角色插圖＋24 個圖示。
