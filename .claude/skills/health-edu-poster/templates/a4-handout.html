@@ -138,9 +138,14 @@
   /* 不要用 window.print() 按鈕：Artifact 是跑在 sandboxed iframe 裡，iframe 沒有
      allow-modals 權限時 window.print() 會被瀏覽器靜默擋掉（點了沒反應、也不報錯），
      這是實測過的坑，不要再犯。改成純提示文字，教使用者用瀏覽器原生功能列印。
-     桌面版是鍵盤快捷鍵 Cmd/Ctrl+P；手機沒有鍵盤，這招沒用，要改成點瀏覽器自己的
-     選單/分享鍵找「列印」——用 (pointer:coarse) 判斷觸控裝置，兩種提示都寫、
-     用 CSS 切換顯示哪一個，不要只顧桌面版。 */
+     桌面版是鍵盤快捷鍵 Cmd/Ctrl+P，用 (pointer:coarse) 判斷觸控裝置切換文字。
+     手機情境更複雜（2026-09-08 實測發現）：在 Claude 手機 App 內開 Artifact，
+     右上角的分享鍵開的是「Share artifact」協作分享面板（Copy link／權限設定），
+     不是系統分享選單，裡面完全沒有列印功能——這是 App 本身 webview 的限制，
+     頁面自己的 CSS/JS 生不出一個 App 沒提供的功能。唯一路徑：把連結複製起來，
+     貼到手機瀏覽器（Safari/Chrome）真的打開這個網頁，瀏覽器才有系統層的
+     列印/分享/存 PDF 功能。手機提示文字要教這個兩步驟，不要只教「找瀏覽器選單」
+     ——App 裡面根本沒有瀏覽器選單。 */
   .print-btn{
     position:fixed; top:16px; right:16px; left:16px; z-index:10;
     max-width:fit-content; margin-left:auto;
@@ -165,7 +170,7 @@
 
 <div class="print-btn">
   <span class="hint-desktop">列印／存 PDF：按 <kbd>⌘P</kbd> 或 <kbd>Ctrl+P</kbd></span>
-  <span class="hint-mobile">列印／存 PDF：點瀏覽器選單或分享鍵，選「列印」</span>
+  <span class="hint-mobile">列印／存 PDF：複製連結到 Safari/Chrome 開啟，再用瀏覽器選單列印</span>
 </div>
 
 <!-- 這裡貼 assets/library/icons/icons.svg 的 <symbol> 內容，包在一個 display:none 的 <svg> 裡 -->
