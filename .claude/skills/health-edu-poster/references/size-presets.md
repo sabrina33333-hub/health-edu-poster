@@ -36,6 +36,8 @@
 
 **素材庫圖片是 16:9（1280x720），全寬單張情境不能用 `cover`（2026-09-08 踩過的坑）：** `.art img` 預設用 `object-fit:cover` 撐滿容器，這在 `.split` 裡的正常尺寸容器（寬高比接近圖片本身）沒問題；但套版流程裡有一種「單張滿版插圖＋下面接 actionstrip」的段落（模板裡標記為「日常行動類段落」），這張圖的容器是**整個內容寬度**、高度卻只有 70-90px 上下，寬高比被拉到 10:1 以上，遠超過素材庫圖片實際的 16:9——用 `cover` 會把圖片左右兩側裁掉大半，六宮格插圖只剩中間一兩格看得到，其餘被切掉，肉眼看縮圖很容易忽略（因為看起來「有圖」，不會像斷頁那樣明顯），是 Sabrina 實際列印後才發現的。**套版時這一段的 `<div class="art">` 一定要加上 `banner` class**（`<div class="art banner">`），對應的 CSS 用 `object-fit:contain` + 固定高度（不撐滿寬度、置中），寬度會自動內縮但圖片完整不裁切，模板 `a4-handout.html` 裡已經內建這組 `.art.banner` 規則，套版時直接沿用即可，不要手動改回單純 `.art`。
 
+**列印提示按鈕（`.print-btn`）不能只靠 `@media print{display:none}` 隱藏（2026-09-08 二度踩坑）：** 上面那次改成「壓縮值變預設」修好了頁數，但 Sabrina 再印一次，列印提示按鈕還是出現在列印預覽裡——再次證實 `@media print` 這個機制在 Artifact 的 iframe 裡不可靠，不只影響字級間距，連簡單的 `display:none` 都可能失效。**修正兩件事**：(1) 按鈕原本用 `position:fixed`，這是相對「視窗」定位、脫離文件流，改成放進 `<header>` 裡、用 `position:absolute` 相對 header 定位（header 設 `position:relative`），跟著文件走。(2) 在 `</div>`（`.wrap` 結束）後面加一段 `<script>`，監聽 `beforeprint`/`afterprint` 事件與 `matchMedia('print')` 變化，直接用 JS 把 `.print-btn` 的 `style.display` 設成 `none`/還原——inline style 的優先權比任何 CSS 規則都高，不依賴 `@media print` 是否生效。`a4-handout.html` 現在已經內建這段 markup 位置（`.print-btn` 在 `<header>` 內）跟這段 script（放在檔案最後），**套版時原封不動保留，不要把 `.print-btn` 搬回 header 外面、也不要刪掉結尾的 script**。這個 JS 做法本機測試（headless Chrome print-to-pdf）驗證有效，但跟前面一樣，本機測試無法百分之百還原 Artifact 的 iframe 情境，交付時要照樣提醒使用者用實際列印確認。
+
 **背景色跟避免斷頁（附加規則，跟壓成單頁不衝突，但不能指望它一定生效）：** template 裡還留著這段 print CSS，套版時不要刪掉——在「直接用瀏覽器開本機檔案列印」這種沒有 iframe 包一層的情境下這組規則會生效，只是不能假設在 Artifact 裡也一定生效：
 
 ```css

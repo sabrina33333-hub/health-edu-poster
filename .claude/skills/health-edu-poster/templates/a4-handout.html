@@ -165,13 +165,20 @@
      貼到手機瀏覽器（Safari/Chrome）真的打開這個網頁，瀏覽器才有系統層的
      列印/分享/存 PDF 功能。手機提示文字要教這個兩步驟，不要只教「找瀏覽器選單」
      ——App 裡面根本沒有瀏覽器選單。 */
+  /* 不用 position:fixed（2026-09-08 二度踩坑後改的）：fixed 是相對「視窗」定位，脫離文件流，
+     列印時的行為在 Artifact 的巢狀 iframe 情境下不穩定——Sabrina 實測列印，提示按鈕明明
+     設定了 @media print{display:none} 卻還是印出來。改成相對 header 做絕對定位（header 設
+     position:relative，跟著標題區塊走），markup 也要搬進 <header> 裡面（見下方 <header> 區塊，
+     不要放在 header 外面）。CSS 隱藏規則保留當防呆，但真正生效靠的是 body 結尾那段
+     beforeprint/afterprint JS，用 inline style 直接蓋掉，優先權比任何 CSS 都高，
+     不依賴 @media print 這個在此情境下不可靠的機制。*/
+  header{ position:relative; }
   .print-btn{
-    position:fixed; top:16px; right:16px; left:16px; z-index:10;
-    max-width:fit-content; margin-left:auto;
+    position:absolute; top:0; right:0;
+    max-width:fit-content;
     display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;
     background:var(--paper-raised); color:var(--ink-soft); border:1px solid var(--line); border-radius:999px;
-    padding:8px 14px; font-family:'Noto Sans TC',sans-serif; font-size:12.5px; font-weight:500;
-    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    padding:6px 12px; font-family:'Noto Sans TC',sans-serif; font-size:11px; font-weight:500;
   }
   .print-btn kbd{
     font-family:inherit; font-weight:700; color:var(--ink);
@@ -187,11 +194,6 @@
   }
 </style>
 
-<div class="print-btn">
-  <span class="hint-desktop">列印／存 PDF：按 <kbd>⌘P</kbd> 或 <kbd>Ctrl+P</kbd></span>
-  <span class="hint-mobile">列印／存 PDF：複製連結到 Safari/Chrome 開啟，再用瀏覽器選單列印</span>
-</div>
-
 <!-- 這裡貼 assets/library/icons/icons.svg 的 <symbol> 內容，包在一個 display:none 的 <svg> 裡 -->
 <svg style="display:none">
   <!-- {{ICON_SYMBOLS}} -->
@@ -203,6 +205,10 @@
     <span class="eyebrow">{{EYEBROW_TEXT}}</span>
     <h1>{{H1}}</h1>
     <p class="subtitle">{{SUBTITLE}}</p>
+    <div class="print-btn">
+      <span class="hint-desktop">列印／存 PDF：按 <kbd>⌘P</kbd> 或 <kbd>Ctrl+P</kbd></span>
+      <span class="hint-mobile">列印／存 PDF：複製連結到 Safari/Chrome 開啟，再用瀏覽器選單列印</span>
+    </div>
   </header>
 
   <!-- 段落元件庫，依主題複製需要的段落、刪掉不需要的，編號要連續 -->
@@ -270,3 +276,23 @@
   </footer>
 
 </div>
+
+<script>
+/* @media print 在 Artifact 的 sandboxed iframe 裡實測不可靠，改用 JS 監聽
+   beforeprint/afterprint 事件，直接用 inline style 蓋掉列印提示按鈕，優先權比任何 CSS 規則都高。
+   套版時原封不動保留這段，不要刪掉。 */
+(function(){
+  var btn = document.querySelector('.print-btn');
+  if(!btn) return;
+  function hide(){ btn.style.display='none'; }
+  function show(){ btn.style.display=''; }
+  window.addEventListener('beforeprint', hide);
+  window.addEventListener('afterprint', show);
+  if(window.matchMedia){
+    var mql = window.matchMedia('print');
+    var onChange = function(e){ if(e.matches){ hide(); } else { show(); } };
+    if(mql.addEventListener) mql.addEventListener('change', onChange);
+    else if(mql.addListener) mql.addListener(onChange);
+  }
+})();
+</script>
