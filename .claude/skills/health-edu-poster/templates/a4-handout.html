@@ -124,15 +124,74 @@
      （不能只靠螢幕版 max-width:920px，那個比 A4 版心寬，印表機會被迫縮放，字級跟版面
      就不是設計時的樣子了）。背景色要用 print-color-adjust，不然瀏覽器預設印刷會把
      卡片底色、嚴重度色階全部印成白底，資訊圖表的顏色語意就不見了。 */
-  @page{ size:A4; margin:15mm 14mm; }
+  @page{ size:A4; margin:12mm 12mm; }
   @media print{
     *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     body{ background:var(--paper); }
     .wrap{ max-width:100%; padding:0; }
-    section{ break-inside:avoid-page; }
-    .sev-row, .riskcard, .action-chip, .comp-card, .warn-box{ break-inside:avoid; }
-    header{ break-after:avoid; }
     .print-btn{ display:none; }
+
+    /* 全部塞進一張 A4（2026-09-08 起的標準要求，不是可選項）：下面這組是壓縮到
+       單頁用的字級/間距基準值，是從「高血壓」四段版實測調出來的起點，不是萬用值
+       ——內容比較多的主題（例如五段+警示框的「高血糖」版，實測要再往下壓一截）
+       要照比例再縮。套用後一定要照 references/size-presets.md 寫的方法用
+       headless Chrome 印成 PDF、檢查 /Count 是不是 1，不要只憑螢幕上看起來覺得
+       「應該塞得下」就結案，肉眼在螢幕上判斷印刷版面幾乎都不準。 */
+    header{ margin-bottom:8px; }
+    .eyebrow{ font-size:8px; padding:2px 8px; margin-bottom:3px; }
+    h1{ font-size:18px; }
+    .subtitle{ font-size:9.5px; margin-top:3px; line-height:1.4; max-width:none; }
+
+    section{ margin-bottom:8px; }
+    .sec-head{ margin-bottom:5px; gap:5px; }
+    .sec-num{ font-size:9.5px; }
+    h2{ font-size:12px; }
+    p{ font-size:9.5px; line-height:1.4; }
+
+    .split{ gap:7px; }
+    .art{ border-radius:6px; }
+    .art img{ max-height:75px; object-fit:cover; }
+
+    .ladder{ gap:3px; }
+    .sev-row{ padding:4px 7px; gap:7px; border-radius:5px; }
+    .sev-rail{ width:4px; }
+    .sev-label{ font-size:9.5px; }
+    .sev-note{ font-size:8px; }
+    .sev-range{ font-size:11px; }
+    .sev-unit{ font-size:7px; }
+    .ladder-note{ font-size:7.5px; margin-top:4px; line-height:1.4; }
+
+    .riskgrid{ gap:6px; }
+    .riskcard{ padding:6px 8px; border-radius:6px; }
+    .riskcard h3{ font-size:9.5px; margin-bottom:3px; gap:4px; }
+    .riskcard h3 .icon{ width:11px; height:11px; }
+    .riskcard ul{ gap:2px; }
+    .riskcard li{ font-size:8px; padding-left:9px; line-height:1.3; }
+    .riskcard li::before{ width:3px; height:3px; top:5px; }
+
+    .actionstrip{ gap:5px; margin-top:6px; }
+    .action-chip{ padding:5px; border-radius:5px; }
+    .action-chip .icon{ width:13px; height:13px; margin-bottom:1px; }
+    .action-chip .t{ font-size:7.5px; }
+
+    .compgrid{ gap:5px; margin-top:6px; }
+    .comp-card{ padding:6px 8px; border-radius:6px; }
+    .comp-card h3{ font-size:9px; margin-bottom:2px; gap:4px; }
+    .comp-card h3 .icon{ width:11px; height:11px; }
+    .comp-card p{ font-size:7.5px; line-height:1.3; }
+
+    .warn-box{ padding:5px 7px; gap:5px; margin-top:4px; border-radius:5px; }
+    .warn-box .icon{ width:13px; height:13px; }
+    .warn-box h3{ font-size:8.5px; margin-bottom:1px; }
+    .warn-box p{ font-size:7px; line-height:1.3; }
+
+    .encourage{ padding:5px 9px; font-size:9px; margin-top:5px; border-radius:6px; }
+
+    footer{ padding-top:5px; margin-top:3px; }
+    footer p{ font-size:6.5px; line-height:1.35; }
+
+    section, .sev-row, .riskcard, .action-chip, .comp-card, .warn-box{ break-inside:avoid; }
+    header{ break-after:avoid; }
   }
 
   /* 不要用 window.print() 按鈕：Artifact 是跑在 sandboxed iframe 裡，iframe 沒有
