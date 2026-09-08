@@ -57,139 +57,95 @@
     --sev-5:#D66E6E; --sev-5-bg:#3A1B1B;
   }
 
+  /* 2026-09-08 起：這份字級/間距是「預設值」不是「印刷限定值」，直接壓緊到
+     單頁 A4 塞得下的密度，螢幕上看起來也是這個樣子。原本的做法是螢幕版用寬鬆
+     字級、另外寫一組 @media print 縮小版——結果實測發現 Artifact 是跑在
+     claude.ai 的 sandboxed iframe 裡，使用者按瀏覽器列印時 @media print 這組
+     規則整包沒有生效（列印預覽裡連「應該要隱藏」的列印提示按鈕都還在，插圖也是
+     螢幕版原始大小，證實 print media query 在這個內嵌 iframe 環境不可靠）。
+     所以不能靠「螢幕鬆、列印時才收緊」這種切換式做法，唯一可靠的路徑是讓預設
+     樣式本身就是壓縮過、螢幕跟列印共用同一套，才不會受制於 print media query
+     生不生效。 */
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;-webkit-font-smoothing:antialiased;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;-webkit-font-smoothing:antialiased;font-size:9.5px;}
   h1,h2,h3{margin:0;text-wrap:balance;font-family:'Noto Sans TC',sans-serif;}
-  .icon{width:22px;height:22px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;}
-  .wrap{max-width:920px;margin:0 auto;padding:44px 24px 72px;}
+  .icon{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .wrap{max-width:920px;margin:0 auto;padding:14px 16px 18px;}
 
-  header{margin-bottom:40px;}
-  .eyebrow{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.12em;color:var(--primary-dark);text-transform:uppercase;margin:0 0 10px;background:var(--primary-soft);padding:5px 12px;border-radius:999px;}
-  h1{font-size:34px;font-weight:900;color:var(--ink);line-height:1.3;}
-  .subtitle{margin:12px 0 0;color:var(--ink-soft);font-size:16.5px;line-height:1.75;max-width:58ch;}
+  header{margin-bottom:8px;}
+  .eyebrow{display:inline-block;font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--primary-dark);text-transform:uppercase;margin:0 0 3px;background:var(--primary-soft);padding:2px 8px;border-radius:999px;}
+  h1{font-size:18px;font-weight:900;color:var(--ink);line-height:1.3;}
+  .subtitle{margin:3px 0 0;color:var(--ink-soft);font-size:9.5px;line-height:1.4;max-width:62ch;}
 
-  section{margin-bottom:56px;}
-  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;}
-  .sec-num{font-size:15px;font-weight:900;color:var(--primary);font-variant-numeric:tabular-nums;flex:none;}
-  h2{font-size:22px;font-weight:900;color:var(--ink);}
-  p{line-height:1.75;color:var(--ink-soft);}
+  section{margin-bottom:8px;}
+  .sec-head{display:flex;align-items:baseline;gap:5px;margin-bottom:5px;}
+  .sec-num{font-size:9.5px;font-weight:900;color:var(--primary);font-variant-numeric:tabular-nums;flex:none;}
+  h2{font-size:12px;font-weight:900;color:var(--ink);}
+  p{line-height:1.4;color:var(--ink-soft);font-size:9.5px;}
 
-  .split{display:grid;grid-template-columns:0.9fr 1.1fr;gap:28px;align-items:center;}
+  .split{display:grid;grid-template-columns:0.9fr 1.1fr;gap:7px;align-items:center;}
   .split.reverse{grid-template-columns:1.1fr 0.9fr;}
   .split.reverse .art{order:2;}
-  .art{border-radius:20px;overflow:hidden;background:var(--paper-raised);border:1px solid var(--line);}
-  .art img{display:block;width:100%;height:auto;}
+  .art{border-radius:6px;overflow:hidden;background:var(--paper-raised);border:1px solid var(--line);}
+  .art img{display:block;width:100%;height:auto;max-height:75px;object-fit:cover;}
 
-  .ladder{display:flex;flex-direction:column;gap:9px;}
-  .sev-row{display:flex;align-items:center;gap:14px;background:var(--sev-bg);border-radius:12px;padding:11px 16px;}
-  .sev-rail{flex:none;width:7px;align-self:stretch;border-radius:4px;background:var(--sev-color);}
+  .ladder{display:flex;flex-direction:column;gap:3px;}
+  .sev-row{display:flex;align-items:center;gap:7px;background:var(--sev-bg);border-radius:5px;padding:4px 7px;}
+  .sev-rail{flex:none;width:4px;align-self:stretch;border-radius:4px;background:var(--sev-color);}
   .sev-body{flex:1;min-width:0;}
-  .sev-label{font-weight:700;font-size:15px;color:var(--ink);}
-  .sev-note{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
-  .sev-range{flex:none;font-weight:900;font-size:17px;color:var(--sev-color);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
-  .sev-unit{font-size:11px;font-weight:500;color:var(--ink-faint);display:block;text-align:right;}
-  .ladder-note{margin-top:14px;font-size:12.5px;color:var(--ink-faint);line-height:1.7;}
+  .sev-label{font-weight:700;font-size:9.5px;color:var(--ink);}
+  .sev-note{font-size:8px;color:var(--ink-soft);margin-top:1px;}
+  .sev-range{flex:none;font-weight:900;font-size:11px;color:var(--sev-color);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+  .sev-unit{font-size:7px;font-weight:500;color:var(--ink-faint);display:block;text-align:right;}
+  .ladder-note{margin-top:4px;font-size:7.5px;color:var(--ink-faint);line-height:1.4;}
 
-  .riskgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .riskcard{background:var(--paper-raised);border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
-  .riskcard h3{font-size:14.5px;font-weight:700;color:var(--ink);margin-bottom:10px;}
-  .riskcard ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;}
-  .riskcard li{position:relative;padding-left:16px;font-size:14px;color:var(--ink-soft);line-height:1.6;}
-  .riskcard li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--primary);}
+  .riskgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .riskcard{background:var(--paper-raised);border:1px solid var(--line);border-radius:6px;padding:6px 8px;}
+  .riskcard h3{font-size:9.5px;font-weight:700;color:var(--ink);margin-bottom:3px;display:flex;align-items:center;gap:4px;}
+  .riskcard h3 .icon{width:11px;height:11px;color:var(--primary);}
+  .riskcard ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px;}
+  .riskcard li{position:relative;padding-left:9px;font-size:8px;color:var(--ink-soft);line-height:1.3;}
+  .riskcard li::before{content:"";position:absolute;left:0;top:5px;width:3px;height:3px;border-radius:50%;background:var(--primary);}
 
-  .actionstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:20px;}
-  .action-chip{background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:center;}
-  .action-chip .num{font-size:11px;font-weight:700;color:var(--primary);letter-spacing:.08em;}
-  .action-chip .t{font-size:13.5px;font-weight:700;color:var(--ink);margin-top:4px;}
+  .actionstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:5px;margin-top:6px;}
+  .action-chip{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;padding:5px;text-align:center;}
+  .action-chip .icon{color:var(--primary);width:13px;height:13px;margin:0 auto 1px;}
+  .action-chip .num{font-size:7px;font-weight:700;color:var(--primary);letter-spacing:.06em;}
+  .action-chip .t{font-size:7.5px;font-weight:700;color:var(--ink);}
 
-  .compgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;}
-  .comp-card{background:var(--accent-warm-soft);border-radius:14px;padding:16px 18px;}
-  .comp-card h3{font-size:14.5px;font-weight:700;color:var(--ink);margin-bottom:6px;}
-  .comp-card p{font-size:13px;line-height:1.6;margin:0;color:var(--ink-soft);}
+  .compgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px;}
+  .comp-card{background:var(--accent-warm-soft);border-radius:6px;padding:6px 8px;}
+  .comp-card h3{font-size:9px;font-weight:700;color:var(--ink);margin-bottom:2px;display:flex;align-items:center;gap:4px;}
+  .comp-card h3 .icon{width:11px;height:11px;color:var(--accent-warm);}
+  .comp-card p{font-size:7.5px;line-height:1.3;margin:0;color:var(--ink-soft);}
 
-  .encourage{background:var(--primary-soft);border-radius:14px;padding:18px 22px;text-align:center;color:var(--primary-dark);font-weight:700;font-size:15px;margin-top:16px;}
+  .warn-box{display:flex;gap:5px;align-items:flex-start;background:var(--accent-warm-soft);border-radius:5px;padding:5px 7px;margin-top:4px;}
+  .warn-box .icon{color:var(--accent-warm);width:13px;height:13px;margin-top:1px;}
+  .warn-box h3{font-size:8.5px;font-weight:700;color:var(--ink);margin-bottom:1px;}
+  .warn-box p{font-size:7px;margin:0;line-height:1.3;}
 
-  footer{border-top:1px solid var(--line);padding-top:20px;margin-top:8px;}
-  footer p{font-size:12px;color:var(--ink-faint);line-height:1.7;margin:0;}
+  .encourage{background:var(--primary-soft);border-radius:6px;padding:5px 9px;text-align:center;color:var(--primary-dark);font-weight:700;font-size:9px;margin-top:5px;}
 
-  @media (max-width:720px){
+  footer{border-top:1px solid var(--line);padding-top:5px;margin-top:3px;}
+  footer p{font-size:6.5px;color:var(--ink-faint);line-height:1.35;margin:0;}
+
+  @media (max-width:480px){
     .split, .split.reverse{grid-template-columns:1fr;}
     .split.reverse .art{order:0;}
     .riskgrid{grid-template-columns:1fr;}
     .compgrid{grid-template-columns:1fr;}
-    h1{font-size:27px;}
   }
 
-  /* 真的印出來是 A4 尺寸：@page 設定頁面大小/邊界，.wrap 在印刷時填滿可印刷區域
-     （不能只靠螢幕版 max-width:920px，那個比 A4 版心寬，印表機會被迫縮放，字級跟版面
-     就不是設計時的樣子了）。背景色要用 print-color-adjust，不然瀏覽器預設印刷會把
-     卡片底色、嚴重度色階全部印成白底，資訊圖表的顏色語意就不見了。 */
+  /* @page/print 這組只剩「錦上添花」的角色（背景色、避免斷頁），不再負責壓縮字級
+     ——字級壓縮已經是預設值的一部分（見上面說明），不管 @media print 有沒有生效
+     都不影響能不能塞進一頁。這組規則在「直接開瀏覽器印本機檔案」這種沒有 iframe
+     包一層的情境下還是有用（background/color-adjust 確實會生效），留著無害。 */
   @page{ size:A4; margin:12mm 12mm; }
   @media print{
     *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     body{ background:var(--paper); }
     .wrap{ max-width:100%; padding:0; }
     .print-btn{ display:none; }
-
-    /* 全部塞進一張 A4（2026-09-08 起的標準要求，不是可選項）：下面這組是壓縮到
-       單頁用的字級/間距基準值，是從「高血壓」四段版實測調出來的起點，不是萬用值
-       ——內容比較多的主題（例如五段+警示框的「高血糖」版，實測要再往下壓一截）
-       要照比例再縮。套用後一定要照 references/size-presets.md 寫的方法用
-       headless Chrome 印成 PDF、檢查 /Count 是不是 1，不要只憑螢幕上看起來覺得
-       「應該塞得下」就結案，肉眼在螢幕上判斷印刷版面幾乎都不準。 */
-    header{ margin-bottom:8px; }
-    .eyebrow{ font-size:8px; padding:2px 8px; margin-bottom:3px; }
-    h1{ font-size:18px; }
-    .subtitle{ font-size:9.5px; margin-top:3px; line-height:1.4; max-width:none; }
-
-    section{ margin-bottom:8px; }
-    .sec-head{ margin-bottom:5px; gap:5px; }
-    .sec-num{ font-size:9.5px; }
-    h2{ font-size:12px; }
-    p{ font-size:9.5px; line-height:1.4; }
-
-    .split{ gap:7px; }
-    .art{ border-radius:6px; }
-    .art img{ max-height:75px; object-fit:cover; }
-
-    .ladder{ gap:3px; }
-    .sev-row{ padding:4px 7px; gap:7px; border-radius:5px; }
-    .sev-rail{ width:4px; }
-    .sev-label{ font-size:9.5px; }
-    .sev-note{ font-size:8px; }
-    .sev-range{ font-size:11px; }
-    .sev-unit{ font-size:7px; }
-    .ladder-note{ font-size:7.5px; margin-top:4px; line-height:1.4; }
-
-    .riskgrid{ gap:6px; }
-    .riskcard{ padding:6px 8px; border-radius:6px; }
-    .riskcard h3{ font-size:9.5px; margin-bottom:3px; gap:4px; }
-    .riskcard h3 .icon{ width:11px; height:11px; }
-    .riskcard ul{ gap:2px; }
-    .riskcard li{ font-size:8px; padding-left:9px; line-height:1.3; }
-    .riskcard li::before{ width:3px; height:3px; top:5px; }
-
-    .actionstrip{ gap:5px; margin-top:6px; }
-    .action-chip{ padding:5px; border-radius:5px; }
-    .action-chip .icon{ width:13px; height:13px; margin-bottom:1px; }
-    .action-chip .t{ font-size:7.5px; }
-
-    .compgrid{ gap:5px; margin-top:6px; }
-    .comp-card{ padding:6px 8px; border-radius:6px; }
-    .comp-card h3{ font-size:9px; margin-bottom:2px; gap:4px; }
-    .comp-card h3 .icon{ width:11px; height:11px; }
-    .comp-card p{ font-size:7.5px; line-height:1.3; }
-
-    .warn-box{ padding:5px 7px; gap:5px; margin-top:4px; border-radius:5px; }
-    .warn-box .icon{ width:13px; height:13px; }
-    .warn-box h3{ font-size:8.5px; margin-bottom:1px; }
-    .warn-box p{ font-size:7px; line-height:1.3; }
-
-    .encourage{ padding:5px 9px; font-size:9px; margin-top:5px; border-radius:6px; }
-
-    footer{ padding-top:5px; margin-top:3px; }
-    footer p{ font-size:6.5px; line-height:1.35; }
-
     section, .sev-row, .riskcard, .action-chip, .comp-card, .warn-box{ break-inside:avoid; }
     header{ break-after:avoid; }
   }
