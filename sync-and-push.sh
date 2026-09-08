@@ -45,7 +45,8 @@ MSG="${1:-Sync from local iCloud copy - $(date '+%Y-%m-%d %H:%M')}"
 echo "== 3. Commit =="
 git commit -q -m "$MSG
 
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01SLuzuRRBa6WLbxDHxwx5fQ"
 
 echo "== 4. Push 到 GitHub =="
 git push
