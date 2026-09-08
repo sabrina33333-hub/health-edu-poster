@@ -88,6 +88,10 @@
   .split.reverse .art{order:2;}
   .art{border-radius:6px;overflow:hidden;background:var(--paper-raised);border:1px solid var(--line);}
   .art img{display:block;width:100%;height:auto;max-height:75px;object-fit:cover;}
+  /* 素材庫圖片固定 16:9（1280x720），全寬單張情境用 cover 會把畫面裁到只剩中間一小條，
+     所以獨立滿版的那張（不在 .split 裡）改用 contain + 縮圖框，讓圖完整不被切 */
+  .art.banner{width:fit-content;max-width:100%;margin:0 auto;background:transparent;border:none;}
+  .art.banner img{width:auto;height:130px;max-height:130px;object-fit:contain;border-radius:6px;background:var(--paper-raised);border:1px solid var(--line);}
 
   .ladder{display:flex;flex-direction:column;gap:3px;}
   .sev-row{display:flex;align-items:center;gap:7px;background:var(--sev-bg);border-radius:5px;padding:4px 7px;}
@@ -243,7 +247,7 @@
   <!-- 元件：日常行動類段落（單張插圖 + 精簡標籤條） -->
   <section>
     <div class="sec-head"><span class="sec-num">{{NN}}</span><h2>{{SECTION_TITLE}}</h2></div>
-    <div class="art"><img src="{{IMG_BASE64}}" alt="{{IMG_ALT}}"></div>
+    <div class="art banner"><img src="{{IMG_BASE64}}" alt="{{IMG_ALT}}"></div>
     <div class="actionstrip">
       <div class="action-chip"><div class="num">01</div><div class="t">{{ACTION_LABEL}}</div></div>
     </div>
