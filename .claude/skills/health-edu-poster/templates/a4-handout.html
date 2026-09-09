@@ -68,6 +68,7 @@
   :root{
     --wrap-w: 860px;
     --banner-w: 360px;
+    --art-w: 260px;
     --fs-body: 15px; --fs-h1: 30px; --fs-subtitle: 15px; --fs-h2: 19px; --fs-secnum: 14px;
     --fs-eyebrow: 12px;
     --fs-sevlabel: 15px; --fs-sevnote: 13px; --fs-sevrange: 17.5px; --fs-sevunit: 11px; --fs-laddernote: 12.5px;
@@ -81,6 +82,7 @@
   html.printing{
     --wrap-w: 700px;
     --banner-w: 290px;
+    --art-w: 220px;
     --fs-body: 11.5px; --fs-h1: 23px; --fs-subtitle: 11.5px; --fs-h2: 15px; --fs-secnum: 11px;
     --fs-eyebrow: 9.5px;
     --fs-sevlabel: 11.5px; --fs-sevnote: 10px; --fs-sevrange: 13.5px; --fs-sevunit: 8.5px; --fs-laddernote: 9.5px;
@@ -108,6 +110,8 @@
   .eyebrow{display:inline-block;font-size:var(--fs-eyebrow);font-weight:700;letter-spacing:.08em;color:var(--primary-dark);text-transform:uppercase;margin:0 0 4px;background:var(--primary-soft);padding:2px 8px;border-radius:999px;}
   h1{font-size:var(--fs-h1);font-weight:900;color:var(--ink);line-height:1.25;}
   .subtitle{margin:4px 0 0;color:var(--ink-soft);font-size:var(--fs-subtitle);line-height:1.4;max-width:62ch;}
+  .resize-hint{margin:3px 0 0;color:var(--ink-faint);font-size:calc(var(--fs-subtitle) - 2px);font-style:italic;}
+  html.printing .resize-hint{ display:none; }
 
   section{margin-bottom:8px;}
   .sec-head{display:flex;align-items:baseline;gap:6px;margin-bottom:5px;}
@@ -117,17 +121,22 @@
 
   /* align-items 用 start 不用 center（2026-09-09 改）：素材庫圖片跟旁邊文字區塊的高度常常對不齊
      （圖片是固定 16:9，文字區塊高度看內容多寡），用 center 對齊時矮的那邊會上下都留白、視覺上像
-     「飄浮在中間」，改成 start（頂端對齊）看起來自然，剩下的高度差就落在底部，不會兩邊都空。 */
-  .split{display:grid;grid-template-columns:0.72fr 1.28fr;gap:10px;align-items:start;}
-  .split.reverse{grid-template-columns:1.28fr 0.72fr;}
+     「飄浮在中間」，改成 start（頂端對齊）看起來自然，剩下的高度差就落在底部，不會兩邊都空。
+     grid-template-columns 用 auto 1fr（2026-09-09 七度調整，插圖改成可手動拖曳調整大小後才需要）：
+     圖片欄寬跟著圖片自己的實際寬度走（配合下面 .art 的 resize:horizontal），文字欄自動吃剩下空間，
+     使用者拖大/拖小圖片時文字欄跟著讓出/收回，不會重疊。*/
+  .split{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;}
+  .split.reverse{grid-template-columns:1fr auto;}
   .split.reverse .art{order:2;}
   /* 素材庫圖片固定 16:9（1280x720）：容器不強制高度、不裁切，圖片用 width:100%;height:auto
-     自然撐開，大小跟著欄寬走（2026-09-08 四度調整——先前固定矮高度＋contain 雖然不裁圖了，
-     但圖片被縮成一小塊置中、四周留白，跟旁邊文字比例不搭配）。滿版單張（banner）用 max-width
-     控制大小，不是用 height，理由相同。 */
-  .art{border-radius:8px;overflow:hidden;background:var(--paper-raised);border:1px solid var(--line);}
+     自然撐開，大小跟著容器寬度走（2026-09-08 四度調整——先前固定矮高度＋contain 雖然不裁圖了，
+     但圖片被縮成一小塊置中、四周留白，跟旁邊文字比例不搭配）。容器用原生 CSS resize 讓使用者
+     直接拖右下角調整大小（配合檔案結尾 script 存 localStorage，重新整理後保留調整結果）；
+     滿版單張（banner）用 --banner-w 這組變數當初始寬度，同樣可拖曳調整。*/
+  .art{border-radius:8px;overflow:hidden;background:var(--paper-raised);border:1px solid var(--line);
+    resize:horizontal; width:var(--art-w); min-width:90px; max-width:100%;}
   .art img{display:block;width:100%;height:auto;}
-  .art.banner{max-width:var(--banner-w);margin:0 auto;}
+  .art.banner{width:var(--banner-w);max-width:100%;margin:0 auto;resize:horizontal;overflow:hidden;min-width:90px;}
   .art.banner img{width:100%;height:auto;display:block;}
 
   .ladder{display:flex;flex-direction:column;gap:3px;}
@@ -253,6 +262,7 @@
     <span class="eyebrow">{{EYEBROW_TEXT}}</span>
     <h1>{{H1}}</h1>
     <p class="subtitle">{{SUBTITLE}}</p>
+    <p class="resize-hint">插圖右下角可拖曳調整大小，會記住你調整後的結果。</p>
     <div class="print-btn">
       <span class="hint-desktop">列印／存 PDF：按 <kbd>⌘P</kbd> 或 <kbd>Ctrl+P</kbd></span>
       <span class="hint-mobile">列印／存 PDF：複製連結到 Safari/Chrome 開啟，再用瀏覽器選單列印</span>
@@ -343,5 +353,24 @@
     if(mql.addEventListener) mql.addEventListener('change', onChange);
     else if(mql.addListener) mql.addListener(onChange);
   }
+})();
+
+/* 插圖可手動拖曳右下角調整大小（2026-09-09 加入），用 localStorage 記住調過的寬度，
+   同一個瀏覽器下次打開這個 Artifact 還會保留。套版時原封不動保留這段。 */
+(function(){
+  if(!window.ResizeObserver) return;
+  var els = document.querySelectorAll('.art');
+  els.forEach(function(el, i){
+    var key = 'art-w-' + i;
+    var saved = localStorage.getItem(key);
+    if(saved){ el.style.width = saved + 'px'; }
+    var first = true;
+    var ro = new ResizeObserver(function(entries){
+      if(first){ first = false; return; }
+      var w = Math.round(entries[0].contentRect.width);
+      localStorage.setItem(key, w);
+    });
+    ro.observe(el);
+  });
 })();
 </script>
