@@ -57,42 +57,68 @@
     --sev-5:#D66E6E; --sev-5-bg:#3A1B1B;
   }
 
-  /* 2026-09-08 起：這份字級/間距是「預設值」不是「印刷限定值」，直接壓緊到
-     單頁 A4 塞得下的密度，螢幕上看起來也是這個樣子。原本的做法是螢幕版用寬鬆
-     字級、另外寫一組 @media print 縮小版——結果實測發現 Artifact 是跑在
-     claude.ai 的 sandboxed iframe 裡，使用者按瀏覽器列印時 @media print 這組
-     規則整包沒有生效（列印預覽裡連「應該要隱藏」的列印提示按鈕都還在，插圖也是
-     螢幕版原始大小，證實 print media query 在這個內嵌 iframe 環境不可靠）。
-     所以不能靠「螢幕鬆、列印時才收緊」這種切換式做法，唯一可靠的路徑是讓預設
-     樣式本身就是壓縮過、螢幕跟列印共用同一套，才不會受制於 print media query
-     生不生效。 */
+  /* 2026-09-09 六度調整（取代 09-08 的做法）：螢幕看跟列印是兩種情境，不能共用同一套尺寸。
+     09-08 的做法是把「印出來剛好A4」的字級/寬度當成螢幕預設值——這解決了列印塞不進 1 頁的問題，
+     但代價是螢幕上看到的是一欄很窄、字很小、四周留白很多的頁面（Sabrina 反映「字太小、排版奇怪、
+     留白過多」）。現在改法：字級/欄寬全部改用 CSS 變數，`:root` 預設值是螢幕舒適閱讀大小，
+     `html.printing` 這個 class 底下覆寫回真正 A4 可印刷的緊湊值——這個 class 由頁尾的
+     beforeprint/afterprint JS 切換（同一套已經驗證在這個 Artifact 環境可靠的機制，
+     不是只用在列印按鈕上，字級也一起切換）。headless Chrome 的 --print-to-pdf 一樣會觸發
+     beforeprint，所以本機驗證單頁的測試方法不受影響，套版時兩組變數都要照樣填，不要只填一組。 */
+  :root{
+    --wrap-w: 860px;
+    --banner-w: 360px;
+    --fs-body: 15px; --fs-h1: 30px; --fs-subtitle: 15px; --fs-h2: 19px; --fs-secnum: 14px;
+    --fs-eyebrow: 12px;
+    --fs-sevlabel: 15px; --fs-sevnote: 13px; --fs-sevrange: 17.5px; --fs-sevunit: 11px; --fs-laddernote: 12.5px;
+    --fs-warnh3: 14px; --fs-warnp: 11.5px;
+    --fs-riskh3: 15px; --fs-riskli: 13px;
+    --fs-actiont: 12.5px;
+    --fs-comph3: 13.5px; --fs-compp: 12.5px;
+    --fs-encourage: 14px;
+    --fs-footer: 11px;
+  }
+  html.printing{
+    --wrap-w: 700px;
+    --banner-w: 290px;
+    --fs-body: 11.5px; --fs-h1: 23px; --fs-subtitle: 11.5px; --fs-h2: 15px; --fs-secnum: 11px;
+    --fs-eyebrow: 9.5px;
+    --fs-sevlabel: 11.5px; --fs-sevnote: 10px; --fs-sevrange: 13.5px; --fs-sevunit: 8.5px; --fs-laddernote: 9.5px;
+    --fs-warnh3: 10.5px; --fs-warnp: 9px;
+    --fs-riskh3: 11.5px; --fs-riskli: 10px;
+    --fs-actiont: 9.5px;
+    --fs-comph3: 10.5px; --fs-compp: 9.5px;
+    --fs-encourage: 11px;
+    --fs-footer: 8.5px;
+  }
   *{box-sizing:border-box;}
-  /* 2026-09-08 五度調整：字級一定要落在「真人（尤其長者）印出來看得清楚」的下限之上，
-     不能為了塞單頁無限往下壓。body 起跳至少 10.5-11.5px，footer 細字至少 8.5px，
-     這是硬底線；真的塞不下 1 頁時，優先刪減內容量（例如某段的清單項目數、卡片數），
-     不是繼續縮字級或繼續裁圖。 */
-  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;-webkit-font-smoothing:antialiased;font-size:11.5px;}
+  /* 字級下限硬性規定（不因主題內容多寡而破例）：body 系文字（.art 旁邊的說明、卡片內文）
+     `--fs-body`/`--fs-riskli`/`--fs-compp` 這類不能低於 print 模式的 9.5-11.5px 這個量級，
+     footer 細字不能低於 8.5px；塞不下 1 頁時，優先刪減內容量（清單項目數、卡片數），
+     不是繼續縮字級或繼續裁圖——順序見本檔案最後的「塞不下 1 頁時的優先順序」。 */
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;-webkit-font-smoothing:antialiased;font-size:var(--fs-body);}
   h1,h2,h3{margin:0;text-wrap:balance;font-family:'Noto Sans TC',sans-serif;}
   .icon{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;}
-  /* max-width 一定要對齊「真正 A4 可印刷寬度」（2026-09-08 三度踩坑）：A4 寬 210mm，扣掉 @page
-     兩邊 margin 12mm+12mm，可印刷寬度只有 186mm≈703px（96dpi 換算）。不能設得比這個寬，螢幕上看起來
-     的版面比例、換行位置會跟真正列印出來的不一樣。想靠 @media print 改回窄版這條路不可靠（已證實在
-     Artifact 的 iframe 裡不生效），所以「符合A4可印刷寬度」要當螢幕版預設值。內容多的主題（例如原本
-     920px 改 700px 後塞不下 1 頁）優先砍內容，不要把這個數字改大。*/
-  .wrap{max-width:700px;margin:0 auto;padding:12px 16px 12px;}
+  /* wrap 寬度用變數：螢幕版寬一點讀起來舒服，列印版（html.printing）一定要對齊真正 A4
+     可印刷寬度（A4 210mm 扣掉 @page 兩邊 margin 12mm+12mm，可印刷寬度 186mm≈703px，
+     96dpi 換算），這個 700px 不能改大，內容多的主題塞不下時優先砍內容而不是改寬這個數字。*/
+  .wrap{max-width:var(--wrap-w);margin:0 auto;padding:12px 16px 12px;}
 
   header{margin-bottom:7px;position:relative;}
-  .eyebrow{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--primary-dark);text-transform:uppercase;margin:0 0 4px;background:var(--primary-soft);padding:2px 8px;border-radius:999px;}
-  h1{font-size:23px;font-weight:900;color:var(--ink);line-height:1.25;}
-  .subtitle{margin:4px 0 0;color:var(--ink-soft);font-size:11.5px;line-height:1.4;max-width:62ch;}
+  .eyebrow{display:inline-block;font-size:var(--fs-eyebrow);font-weight:700;letter-spacing:.08em;color:var(--primary-dark);text-transform:uppercase;margin:0 0 4px;background:var(--primary-soft);padding:2px 8px;border-radius:999px;}
+  h1{font-size:var(--fs-h1);font-weight:900;color:var(--ink);line-height:1.25;}
+  .subtitle{margin:4px 0 0;color:var(--ink-soft);font-size:var(--fs-subtitle);line-height:1.4;max-width:62ch;}
 
   section{margin-bottom:8px;}
   .sec-head{display:flex;align-items:baseline;gap:6px;margin-bottom:5px;}
-  .sec-num{font-size:11px;font-weight:900;color:var(--primary);font-variant-numeric:tabular-nums;flex:none;}
-  h2{font-size:15px;font-weight:900;color:var(--ink);}
-  p{line-height:1.4;color:var(--ink-soft);font-size:11.5px;}
+  .sec-num{font-size:var(--fs-secnum);font-weight:900;color:var(--primary);font-variant-numeric:tabular-nums;flex:none;}
+  h2{font-size:var(--fs-h2);font-weight:900;color:var(--ink);}
+  p{line-height:1.4;color:var(--ink-soft);font-size:var(--fs-body);}
 
-  .split{display:grid;grid-template-columns:0.72fr 1.28fr;gap:10px;align-items:center;}
+  /* align-items 用 start 不用 center（2026-09-09 改）：素材庫圖片跟旁邊文字區塊的高度常常對不齊
+     （圖片是固定 16:9，文字區塊高度看內容多寡），用 center 對齊時矮的那邊會上下都留白、視覺上像
+     「飄浮在中間」，改成 start（頂端對齊）看起來自然，剩下的高度差就落在底部，不會兩邊都空。 */
+  .split{display:grid;grid-template-columns:0.72fr 1.28fr;gap:10px;align-items:start;}
   .split.reverse{grid-template-columns:1.28fr 0.72fr;}
   .split.reverse .art{order:2;}
   /* 素材庫圖片固定 16:9（1280x720）：容器不強制高度、不裁切，圖片用 width:100%;height:auto
@@ -101,57 +127,59 @@
      控制大小，不是用 height，理由相同。 */
   .art{border-radius:8px;overflow:hidden;background:var(--paper-raised);border:1px solid var(--line);}
   .art img{display:block;width:100%;height:auto;}
-  .art.banner{max-width:300px;margin:0 auto;}
+  .art.banner{max-width:var(--banner-w);margin:0 auto;}
   .art.banner img{width:100%;height:auto;display:block;}
 
   .ladder{display:flex;flex-direction:column;gap:3px;}
   .sev-row{display:flex;align-items:center;gap:8px;background:var(--sev-bg);border-radius:6px;padding:5px 9px;}
   .sev-rail{flex:none;width:4px;align-self:stretch;border-radius:4px;background:var(--sev-color);}
   .sev-body{flex:1;min-width:0;}
-  .sev-label{font-weight:700;font-size:11.5px;color:var(--ink);}
-  .sev-note{font-size:10px;color:var(--ink-soft);margin-top:1px;}
-  .sev-range{flex:none;font-weight:900;font-size:13.5px;color:var(--sev-color);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
-  .sev-unit{font-size:8.5px;font-weight:500;color:var(--ink-faint);display:block;text-align:right;}
-  .ladder-note{margin-top:5px;font-size:9.5px;color:var(--ink-faint);line-height:1.4;}
+  .sev-label{font-weight:700;font-size:var(--fs-sevlabel);color:var(--ink);}
+  .sev-note{font-size:var(--fs-sevnote);color:var(--ink-soft);margin-top:1px;}
+  .sev-range{flex:none;font-weight:900;font-size:var(--fs-sevrange);color:var(--sev-color);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+  .sev-unit{font-size:var(--fs-sevunit);font-weight:500;color:var(--ink-faint);display:block;text-align:right;}
+  .ladder-note{margin-top:5px;font-size:var(--fs-laddernote);color:var(--ink-faint);line-height:1.4;}
 
   .riskgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .riskcard{background:var(--paper-raised);border:1px solid var(--line);border-radius:7px;padding:7px 9px;}
-  .riskcard h3{font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:5px;}
+  .riskcard h3{font-size:var(--fs-riskh3);font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:5px;}
   .riskcard h3 .icon{width:13px;height:13px;color:var(--primary);}
   .riskcard ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px;}
-  .riskcard li{position:relative;padding-left:10px;font-size:10px;color:var(--ink-soft);line-height:1.3;}
+  .riskcard li{position:relative;padding-left:10px;font-size:var(--fs-riskli);color:var(--ink-soft);line-height:1.3;}
   .riskcard li::before{content:"";position:absolute;left:0;top:5px;width:3px;height:3px;border-radius:50%;background:var(--primary);}
 
   .actionstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-top:5px;}
   .action-chip{background:var(--paper-raised);border:1px solid var(--line);border-radius:6px;padding:6px;text-align:center;}
   .action-chip .icon{color:var(--primary);width:15px;height:15px;margin:0 auto 2px;}
-  .action-chip .num{font-size:8.5px;font-weight:700;color:var(--primary);letter-spacing:.06em;}
-  .action-chip .t{font-size:9.5px;font-weight:700;color:var(--ink);}
+  .action-chip .num{font-size:var(--fs-actiont);font-weight:700;color:var(--primary);letter-spacing:.06em;}
+  .action-chip .t{font-size:var(--fs-actiont);font-weight:700;color:var(--ink);}
 
   .compgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:5px;}
   .comp-card{background:var(--accent-warm-soft);border-radius:7px;padding:7px 9px;}
-  .comp-card h3{font-size:10.5px;font-weight:700;color:var(--ink);margin-bottom:3px;display:flex;align-items:center;gap:4px;}
+  .comp-card h3{font-size:var(--fs-comph3);font-weight:700;color:var(--ink);margin-bottom:3px;display:flex;align-items:center;gap:4px;}
   .comp-card h3 .icon{width:12px;height:12px;color:var(--accent-warm);}
-  .comp-card p{font-size:9.5px;line-height:1.3;margin:0;color:var(--ink-soft);}
+  .comp-card p{font-size:var(--fs-compp);line-height:1.3;margin:0;color:var(--ink-soft);}
 
   .warn-box{display:flex;gap:6px;align-items:flex-start;background:var(--accent-warm-soft);border-radius:6px;padding:6px 8px;margin-top:5px;}
   .warn-box .icon{color:var(--accent-warm);width:14px;height:14px;margin-top:1px;}
-  .warn-box h3{font-size:10.5px;font-weight:700;color:var(--ink);margin-bottom:1px;}
-  .warn-box p{font-size:9px;margin:0;line-height:1.3;}
+  .warn-box h3{font-size:var(--fs-warnh3);font-weight:700;color:var(--ink);margin-bottom:1px;}
+  .warn-box p{font-size:var(--fs-warnp);margin:0;line-height:1.3;}
 
-  .encourage{background:var(--primary-soft);border-radius:7px;padding:6px 10px;text-align:center;color:var(--primary-dark);font-weight:700;font-size:11px;margin-top:5px;}
+  .encourage{background:var(--primary-soft);border-radius:7px;padding:6px 10px;text-align:center;color:var(--primary-dark);font-weight:700;font-size:var(--fs-encourage);margin-top:5px;}
 
   footer{border-top:1px solid var(--line);padding-top:5px;margin-top:3px;}
-  footer p{font-size:8.5px;color:var(--ink-faint);line-height:1.35;margin:0;}
+  footer p{font-size:var(--fs-footer);color:var(--ink-faint);line-height:1.35;margin:0;}
 
   /* 塞不下 1 頁時的優先順序（2026-09-08 定案，套版時照這個順序調，不要先動字級）：
      1. 先看內容量能不能減：清單項目數、卡片數、段落數是否真的都必要。
      2. 再收緊間距/padding：section margin-bottom、split gap、各卡片 padding，一次降 1-2px，
         重新測試，不要一次砍一大截破壞版面節奏。
-     3. 圖片大小（.art 的欄寬比例、.art.banner 的 max-width）可以再收窄一點，但不要小到
+     3. 圖片大小（.art 的欄寬比例、.art.banner 的 --banner-w）可以再收窄一點，但不要小到
         辨識不出插圖內容。
-     4. 字級是最後手段，而且不能低於這份模板現在的基準值（body 11.5px / footer 8.5px 這個量級），
-        寧可調整內容量也不要印出來看不清楚。 */
+     4. 字級是最後手段，而且不能低於 `html.printing` 這組變數現在的基準值（body 11.5px /
+        footer 8.5px 這個量級），寧可調整內容量也不要印出來看不清楚。這四步都是在調整
+        `html.printing` 底下的印刷版數值；螢幕版（:root 預設值）維持舒適閱讀大小，不要為了
+        塞版面去動螢幕版數字。 */
 
   @media (max-width:480px){
     .split, .split.reverse{grid-template-columns:1fr;}
@@ -299,13 +327,14 @@
 
 <script>
 /* @media print 在 Artifact 的 sandboxed iframe 裡實測不可靠，改用 JS 監聽
-   beforeprint/afterprint 事件，直接用 inline style 蓋掉列印提示按鈕，優先權比任何 CSS 規則都高。
+   beforeprint/afterprint 事件：(1) 直接用 inline style 蓋掉列印提示按鈕，優先權比任何 CSS
+   規則都高；(2) 切換 html 的 printing class，讓字級/欄寬變數（見檔案開頭 `:root` /
+   `html.printing`）在列印時換成 A4 可印刷的緊湊值，螢幕上維持舒適閱讀大小。
    套版時原封不動保留這段，不要刪掉。 */
 (function(){
   var btn = document.querySelector('.print-btn');
-  if(!btn) return;
-  function hide(){ btn.style.display='none'; }
-  function show(){ btn.style.display=''; }
+  function hide(){ if(btn) btn.style.display='none'; document.documentElement.classList.add('printing'); }
+  function show(){ if(btn) btn.style.display=''; document.documentElement.classList.remove('printing'); }
   window.addEventListener('beforeprint', hide);
   window.addEventListener('afterprint', show);
   if(window.matchMedia){
