@@ -127,7 +127,13 @@
      使用者拖大/拖小圖片時文字欄跟著讓出/收回，不會重疊。*/
   .split{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;}
   .split.reverse{grid-template-columns:1fr auto;}
-  .split.reverse .art{order:2;}
+  /* 不用 order:2 讓 .art 視覺上移到第二欄（2026-09-09 加入拖曳互換位置後，order 這個「視覺
+     順序」跟拖曳互換的「DOM 順序」會互相打架——拖曳實際搬動 DOM 節點，但 order 屬性會無視
+     DOM 順序硬性把 .art 釘在第二欄，導致拖曳看起來沒作用）。改成套版時 markup 直接把 DOM 順序
+     寫成 [文字區塊, .art]（reverse 段落範例見下方「因子/原因類段落」元件，.art 放在
+     .riskgrid 後面），配合 grid-template-columns:1fr auto 達到一樣的視覺效果，且跟拖曳互換
+     完全相容。套版時如果是 reverse 排列（圖在右），記得 markup 順序也要對應調整，不要沿用
+     舊版「.art 永遠寫在最前面、靠 order 調視覺順序」的寫法。*/
   /* 素材庫圖片固定 16:9（1280x720）：容器不強制高度、不裁切，圖片用 width:100%;height:auto
      自然撐開，大小跟著容器寬度走（2026-09-08 四度調整——先前固定矮高度＋contain 雖然不裁圖了，
      但圖片被縮成一小塊置中、四周留白，跟旁邊文字比例不搭配）。容器用原生 CSS resize 讓使用者
@@ -192,7 +198,7 @@
 
   @media (max-width:480px){
     .split, .split.reverse{grid-template-columns:1fr;}
-    .split.reverse .art{order:0;}
+    .split.reverse .art{order:-1;}
     .riskgrid{grid-template-columns:1fr;}
     .compgrid{grid-template-columns:1fr;}
   }
@@ -249,6 +255,14 @@
   @media (max-width:480px){
     .print-btn{ font-size:11.5px; padding:7px 12px; }
   }
+
+  /* 2026-09-09 八度調整：卡片/圖片可拖曳互換位置，範圍限定在同一組卡片群組內互換順序，
+     不是自由定位——版面還是自動排列，印出來剛好 1 頁的保證不受影響。 */
+  .reorderable{ cursor:grab; }
+  .reorderable:active{ cursor:grabbing; }
+  .reorderable.dragging{ opacity:.35; }
+  .reorderable.drag-over{ outline:2px dashed var(--primary); outline-offset:2px; }
+  html.printing .reorderable{ cursor:default; }
 </style>
 
 <!-- 這裡貼 assets/library/icons/icons.svg 的 <symbol> 內容，包在一個 display:none 的 <svg> 裡 -->
@@ -262,7 +276,7 @@
     <span class="eyebrow">{{EYEBROW_TEXT}}</span>
     <h1>{{H1}}</h1>
     <p class="subtitle">{{SUBTITLE}}</p>
-    <p class="resize-hint">插圖右下角可拖曳調整大小，會記住你調整後的結果。</p>
+    <p class="resize-hint">插圖右下角可拖曳調整大小；卡片、插圖都可以直接拖曳互換位置，會記住你調整後的結果。</p>
     <div class="print-btn">
       <span class="hint-desktop">列印／存 PDF：按 <kbd>⌘P</kbd> 或 <kbd>Ctrl+P</kbd></span>
       <span class="hint-mobile">列印／存 PDF：複製連結到 Safari/Chrome 開啟，再用瀏覽器選單列印</span>
@@ -294,7 +308,6 @@
   <section>
     <div class="sec-head"><span class="sec-num">{{NN}}</span><h2>{{SECTION_TITLE}}</h2></div>
     <div class="split reverse">
-      <div class="art"><img src="{{IMG_BASE64}}" alt="{{IMG_ALT}}"></div>
       <div class="riskgrid">
         <div class="riskcard">
           <h3>{{GROUP_A_TITLE}}</h3>
@@ -305,6 +318,7 @@
           <ul><li>{{ITEM}}</li></ul>
         </div>
       </div>
+      <div class="art"><img src="{{IMG_BASE64}}" alt="{{IMG_ALT}}"></div>
     </div>
   </section>
 
@@ -371,6 +385,70 @@
       localStorage.setItem(key, w);
     });
     ro.observe(el);
+  });
+})();
+
+/* 卡片/圖片可拖曳互換位置（2026-09-09 加入）：範圍限定在同一組卡片群組內互換順序
+   （.ladder／.riskgrid／.actionstrip／.compgrid／.split），不是自由定位到頁面任意位置——
+   版面還是自動排列，印出來剛好 1 頁的保證不受影響。用「交換兩個節點位置」的方式（不是插入
+   排序），邏輯簡單、不會因為容器是 grid 還是 flex 而出錯。順序存 localStorage，重新整理保留。
+   套版時原封不動保留這段。 */
+(function(){
+  var containers = document.querySelectorAll('.ladder, .riskgrid, .actionstrip, .compgrid, .split');
+  containers.forEach(function(container, ci){
+    var items = Array.prototype.slice.call(container.children);
+    if(items.length < 2) return;
+    items.forEach(function(item, idx){
+      item.dataset.origIdx = idx;
+      item.setAttribute('draggable', 'true');
+      item.classList.add('reorderable');
+    });
+    var storageKey = 'order-' + ci;
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(storageKey)); } catch(e){}
+    if(saved && Array.isArray(saved)){
+      saved.forEach(function(origIdx){
+        var el = container.querySelector('[data-orig-idx="' + origIdx + '"]');
+        if(el) container.appendChild(el);
+      });
+    }
+    function persist(){
+      var order = Array.prototype.slice.call(container.children).map(function(c){ return c.dataset.origIdx; });
+      localStorage.setItem(storageKey, JSON.stringify(order));
+    }
+    function swap(a, b){
+      var marker = document.createComment('');
+      container.insertBefore(marker, a);
+      container.insertBefore(a, b);
+      container.insertBefore(b, marker);
+      container.removeChild(marker);
+    }
+    var dragged = null;
+    container.addEventListener('dragstart', function(e){
+      var item = e.target.closest('.reorderable');
+      if(item && item.parentElement === container){
+        dragged = item;
+        item.classList.add('dragging');
+      }
+    });
+    container.addEventListener('dragend', function(){
+      if(dragged) dragged.classList.remove('dragging');
+      container.querySelectorAll('.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
+      dragged = null;
+    });
+    container.addEventListener('dragover', function(e){
+      e.preventDefault();
+      var target = e.target.closest('.reorderable');
+      container.querySelectorAll('.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
+      if(target && target !== dragged) target.classList.add('drag-over');
+    });
+    container.addEventListener('drop', function(e){
+      e.preventDefault();
+      var target = e.target.closest('.reorderable');
+      if(!target || !dragged || target === dragged || target.parentElement !== container) return;
+      swap(dragged, target);
+      persist();
+    });
   });
 })();
 </script>
